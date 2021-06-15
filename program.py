@@ -1,6 +1,6 @@
 from collections import deque
 
-# Сокращения для более удобного вызова функций
+# РЎРѕРєСЂР°С‰РµРЅРёСЏ РґР»СЏ Р±РѕР»РµРµ СѓРґРѕР±РЅРѕРіРѕ РІС‹Р·РѕРІР° С„СѓРЅРєС†РёР№
 mr = brick.motor(M3).setPower
 ml = brick.motor(M4).setPower
 el = brick.encoder(E3).read
@@ -44,20 +44,20 @@ def get_dir():
   return int(yaw()+45)%360//90
   
 def gyro_calibrate():
-  """Колибровка гироскопа""" 
+  """РљРѕР»РёР±СЂРѕРІРєР° РіРёСЂРѕСЃРєРѕРїР°""" 
   brick.gyroscope().calibrate(2000)
   wait(2100)
   
   
 def yaw() -> float:
-  """Возвращает угол вращения робота от 0 до 360, 0 это вверх, поворот по часовой стрелки"""
-  # 0 по гироскопу это вправо поэтому +90 для выравнивания
+  """Р’РѕР·РІСЂР°С‰Р°РµС‚ СѓРіРѕР» РІСЂР°С‰РµРЅРёСЏ СЂРѕР±РѕС‚Р° РѕС‚ 0 РґРѕ 360, 0 СЌС‚Рѕ РІРІРµСЂС…, РїРѕРІРѕСЂРѕС‚ РїРѕ С‡Р°СЃРѕРІРѕР№ СЃС‚СЂРµР»РєРё"""
+  # 0 РїРѕ РіРёСЂРѕСЃРєРѕРїСѓ СЌС‚Рѕ РІРїСЂР°РІРѕ РїРѕСЌС‚РѕРјСѓ +90 РґР»СЏ РІС‹СЂР°РІРЅРёРІР°РЅРёСЏ
   return (brick.gyroscope().read()[6]/1000. + 90)%360
 
 
 def get_angle(angle) -> float:
-  """Возвращает разницу угла робота до цели от -180 до 180"""
-  # Пример угол робота 45, нужно повернуться в 300, функция вернет -105, то есть влево на 105 градусов
+  """Р’РѕР·РІСЂР°С‰Р°РµС‚ СЂР°Р·РЅРёС†Сѓ СѓРіР»Р° СЂРѕР±РѕС‚Р° РґРѕ С†РµР»Рё РѕС‚ -180 РґРѕ 180"""
+  # РџСЂРёРјРµСЂ СѓРіРѕР» СЂРѕР±РѕС‚Р° 45, РЅСѓР¶РЅРѕ РїРѕРІРµСЂРЅСѓС‚СЊСЃСЏ РІ 300, С„СѓРЅРєС†РёСЏ РІРµСЂРЅРµС‚ -105, С‚Рѕ РµСЃС‚СЊ РІР»РµРІРѕ РЅР° 105 РіСЂР°РґСѓСЃРѕРІ
   dif = angle - yaw()
   if dif > 180:
     dif = dif -360 if dif>180 else +360 if dif<180 else 0
@@ -67,26 +67,26 @@ def get_angle(angle) -> float:
 
 
 class Robot():
-  """Класс для взаимодествия с роботом"""
-  # Стартовые координаты робота
+  """РљР»Р°СЃСЃ РґР»СЏ РІР·Р°РёРјРѕРґРµСЃС‚РІРёСЏ СЃ СЂРѕР±РѕС‚РѕРј"""
+  # РЎС‚Р°СЂС‚РѕРІС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ СЂРѕР±РѕС‚Р°
   x = 2
   y = 3
   start_pos = [x, y]
 
   def stop_motor(self):
-    """Остановка моторов"""
+    """РћСЃС‚Р°РЅРѕРІРєР° РјРѕС‚РѕСЂРѕРІ"""
     ml(0)
     mr(0)
 
   def start_motor(self, pleft, pright):
-    """Запуск моторов"""
+    """Р—Р°РїСѓСЃРє РјРѕС‚РѕСЂРѕРІ"""
     ml(pleft)
     mr(pright)
 
 
   def straight_move(self, leng, power=60):
-    """Езда прямо без линии на определенное расстояние регулируясь по гироскопу"""
-    p = 2 # Коэффициент P
+    """Р•Р·РґР° РїСЂСЏРјРѕ Р±РµР· Р»РёРЅРёРё РЅР° РѕРїСЂРµРґРµР»РµРЅРЅРѕРµ СЂР°СЃСЃС‚РѕСЏРЅРёРµ СЂРµРіСѓР»РёСЂСѓСЏСЃСЊ РїРѕ РіРёСЂРѕСЃРєРѕРїСѓ"""
+    p = 2 # РљРѕСЌС„С„РёС†РёРµРЅС‚ P
     angle = yaw()
     start = (el() + er())/2
     cur = start
@@ -98,9 +98,9 @@ class Robot():
     self.stop_motor()
     
   def straight_move_line(self):
-    """Езда прямо по линии на определенное расстояние регулируясь по гироскопу"""
-    power = 30 # Средняя мощность
-    p = 2 # Коэффициент P
+    """Р•Р·РґР° РїСЂСЏРјРѕ РїРѕ Р»РёРЅРёРё РЅР° РѕРїСЂРµРґРµР»РµРЅРЅРѕРµ СЂР°СЃСЃС‚РѕСЏРЅРёРµ СЂРµРіСѓР»РёСЂСѓСЏСЃСЊ РїРѕ РіРёСЂРѕСЃРєРѕРїСѓ"""
+    power = 30 # РЎСЂРµРґРЅСЏСЏ РјРѕС‰РЅРѕСЃС‚СЊ
+    p = 2 # РљРѕСЌС„С„РёС†РёРµРЅС‚ P
     angle = yaw()
     start = (el() + er())/2
     cur = start
@@ -112,9 +112,9 @@ class Robot():
     self.stop_motor()
 
   def back_move(self, leng):
-    """Езда прямо без линии на определенное расстояние регулируясь по гироскопу"""
-    power = 40 # Средняя мощность
-    p = 2 # Коэффициент P
+    """Р•Р·РґР° РїСЂСЏРјРѕ Р±РµР· Р»РёРЅРёРё РЅР° РѕРїСЂРµРґРµР»РµРЅРЅРѕРµ СЂР°СЃСЃС‚РѕСЏРЅРёРµ СЂРµРіСѓР»РёСЂСѓСЏСЃСЊ РїРѕ РіРёСЂРѕСЃРєРѕРїСѓ"""
+    power = 40 # РЎСЂРµРґРЅСЏСЏ РјРѕС‰РЅРѕСЃС‚СЊ
+    p = 2 # РљРѕСЌС„С„РёС†РёРµРЅС‚ P
     angle = yaw()
     start = (el() + er())/2
     cur = start
@@ -126,21 +126,15 @@ class Robot():
     self.stop_motor()
 
   def turn(self, right: bool):
-    if right:
-      dirr = 1
-    else:
-      dirr = -1
+    dirr = 1 if right else -1
     self.rotate_to((yaw()+(45*dirr))%360)
     self.straight_move(265) # 265 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     wait(100)
     self.rotate_to((yaw()+(45*dirr))%360)
-    self.straight_move(330) # 340
+    self.straight_move(340) # 340
     
   def turn1(self, right: bool):
-    if right:
-      dirr = 1
-    else:
-      dirr = -1
+    dirr = 1 if right else -1
     self.back_move(115) # 0
     self.rotate_to((yaw()+(45*dirr))%360)
     self.straight_move(430) # 265 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -150,13 +144,13 @@ class Robot():
 
 
   def followLine(self, leng, white: bool):
-    """Функция езды по линии на расстояние leng по PD регулятору с учетом цвета"""
+    """Р¤СѓРЅРєС†РёСЏ РµР·РґС‹ РїРѕ Р»РёРЅРёРё РЅР° СЂР°СЃСЃС‚РѕСЏРЅРёРµ leng РїРѕ PD СЂРµРіСѓР»СЏС‚РѕСЂСѓ СЃ СѓС‡РµС‚РѕРј С†РІРµС‚Р°"""
     def getErr(white)->int:
       return sl()-sr() if white else sr()-sl()
     
-    power = 60 # Средняя мощность
-    p = 1 # Коэффициент P
-    d = 1 # Коэффициент D
+    power = 60 # РЎСЂРµРґРЅСЏСЏ РјРѕС‰РЅРѕСЃС‚СЊ
+    p = 1 # РљРѕСЌС„С„РёС†РёРµРЅС‚ P
+    d = 1 # РљРѕСЌС„С„РёС†РёРµРЅС‚ D
     
     start = (el() + er())/2
     cur = start
@@ -172,32 +166,20 @@ class Robot():
     self.stop_motor()
 
   def rotate_to(self, _dir: int):
-    """Функция для поворота робота в нужное направление"""   
+    """Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїРѕРІРѕСЂРѕС‚Р° СЂРѕР±РѕС‚Р° РІ РЅСѓР¶РЅРѕРµ РЅР°РїСЂР°РІР»РµРЅРёРµ"""   
     while abs(get_angle(_dir)) > 0.2:
       dif = get_angle(_dir)
-      pow = 7 + 43*abs(dif)/180  # Плвная регулировка скорости
+      pow = 7 + 43*abs(dif)/180  # РџР»РІРЅР°СЏ СЂРµРіСѓР»РёСЂРѕРІРєР° СЃРєРѕСЂРѕСЃС‚Рё
       if(dif > 0):
         self.start_motor(pow,-pow)
       else:
         self.start_motor(-pow,pow)
       wait(1)
     self.stop_motor()
-
-
-  def is_cross(self)->bool:
-    """Функция возвращает есть ли перекресток"""
-    if (self.is_inverse()):
-      return sl()<35 and sr()<35   
-    else:
-      return sl()>65 and sr()>65   
-
-  def is_inverse(self)->bool:
-    """Функция возвращает инвертирована ли клетка"""
-    raise NotImplementedError('isInverse is not implemented')
-
+ 
 
   def where_to_go(self, map, path):
-    # 0 - вверх 1 - вправо 2 - вниз 3 - влево
+    # 0 - РІРІРµСЂС… 1 - РІРїСЂР°РІРѕ 2 - РІРЅРёР· 3 - РІР»РµРІРѕ
     next = path.pop(0)
     robot_pos = map.get_ind(self.x, self.y)
     if next + 6 == robot_pos:
@@ -217,27 +199,28 @@ class Robot():
 
   def readBarCode(self):
     data = []
-    leng = 72
-    while len(data) < 6:
-      self.straight_move(leng, power=25)
-      script.wait(1000)
-      data.append(int(sinv() > 40))
+    power = 20
+    leng = 60
+    for i in range(6):
+      self.straight_move(leng, power)
+      wait(200)
+      data.append(int(sinv() > 50))
       print(data)
-    if 1:
-      cords = [0, 0] # [x, y]
-      for i in range(3):
-        cords[0] += data[i] << i
-        cords[1] += data[3 + i] << i
+
+    cords = [0, 0] # [x, y]
+    for i in range(3):
+      cords[0] += data[i] << i
+      cords[1] += data[3+i] << i
     print(cords)
     return cords
     
 class Map():
-  """Класс объекта карты"""
+  """РљР»Р°СЃСЃ РѕР±СЉРµРєС‚Р° РєР°СЂС‚С‹"""
   def __init__(self, width, height):
-    """Создание карты"""
+    """РЎРѕР·РґР°РЅРёРµ РєР°СЂС‚С‹"""
     self.width = 6   
     self.height = 6
-    self.map = [[0] * 4 for i in range(width*height)]  # Для карты 0 - есть путь, 1 - нет пути
+    self.map = [[0] * 4 for i in range(width*height)]  # Р”Р»СЏ РєР°СЂС‚С‹ 0 - РµСЃС‚СЊ РїСѓС‚СЊ, 1 - РЅРµС‚ РїСѓС‚Рё
     #set borders
     for i in range(width):
       self.map[i][0]=1  #up
@@ -249,7 +232,7 @@ class Map():
     self.map[7][3] = 1
     
   def connected(self, ind)->list:
-    """Возвращает лист вершин доступных из данной"""
+    """Р’РѕР·РІСЂР°С‰Р°РµС‚ Р»РёСЃС‚ РІРµСЂС€РёРЅ РґРѕСЃС‚СѓРїРЅС‹С… РёР· РґР°РЅРЅРѕР№"""
     shift = [-self.width, 1, self.width, -1]
     connect = []
     for i in range(4):
@@ -263,12 +246,12 @@ class Map():
 
 
   def get_path(self, start, finish)->list:
-    """Функция для поиска порядка вершин для перемещения от клетки старта к клетки финиша"""
+    """Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїРѕРёСЃРєР° РїРѕСЂСЏРґРєР° РІРµСЂС€РёРЅ РґР»СЏ РїРµСЂРµРјРµС‰РµРЅРёСЏ РѕС‚ РєР»РµС‚РєРё СЃС‚Р°СЂС‚Р° Рє РєР»РµС‚РєРё С„РёРЅРёС€Р°"""
     previous = [None for i in range(self.width*self.height)]
     previous[start] = -1
 
-    # Тело алгоритма
-    Q = deque() # BFS - так как очередь
+    # РўРµР»Рѕ Р°Р»РіРѕСЂРёС‚РјР°
+    Q = deque() # BFS - С‚Р°Рє РєР°Рє РѕС‡РµСЂРµРґСЊ
     Q.append(start)
     while Q:
       from_ = Q.popleft()
@@ -277,7 +260,7 @@ class Map():
           Q.append(to)
           previous[to] = from_
 
-    # Разматывание пути
+    # Р Р°Р·РјР°С‚С‹РІР°РЅРёРµ РїСѓС‚Рё
     path = []
     cur = finish
     if previous[cur] is None:
@@ -290,24 +273,24 @@ class Map():
     return path
 
 class Program():
-  """Основной класс для управления поведением робота"""
+  """РћСЃРЅРѕРІРЅРѕР№ РєР»Р°СЃСЃ РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ РїРѕРІРµРґРµРЅРёРµРј СЂРѕР±РѕС‚Р°"""
 # 695 => 407.12, 700 => 410,05
   robot = Robot()
   map = Map(width=6, height=6)
 
 
   def update_cell(self, cell: int, mas):
-    """Функция оновления путей для текущей клетки"""
-    # Для карты 0 - есть путь, 1 - нет пути
+    """Р¤СѓРЅРєС†РёСЏ РѕРЅРѕРІР»РµРЅРёСЏ РїСѓС‚РµР№ РґР»СЏ С‚РµРєСѓС‰РµР№ РєР»РµС‚РєРё"""
+    # Р”Р»СЏ РєР°СЂС‚С‹ 0 - РµСЃС‚СЊ РїСѓС‚СЊ, 1 - РЅРµС‚ РїСѓС‚Рё
     self.map.map[cell] = mas
 
 
   def move_path(self, path):
-    """Функция для движения по вершинам графа"""
+    """Р¤СѓРЅРєС†РёСЏ РґР»СЏ РґРІРёР¶РµРЅРёСЏ РїРѕ РІРµСЂС€РёРЅР°Рј РіСЂР°С„Р°"""
     raise NotImplementedError('Move path is not implemented')
   
   def execMain(self):
-    """Главная для исполнения функция"""    
+    """Р“Р»Р°РІРЅР°СЏ РґР»СЏ РёСЃРїРѕР»РЅРµРЅРёСЏ С„СѓРЅРєС†РёСЏ"""    
     gyro_calibrate()
 
 #    self.robot.rotate_to(0)
@@ -348,9 +331,9 @@ class Program():
       next_dir = self.robot.where_to_go(self.map, path)
       print(self.robot.x, self.robot.y, 'nextCORDS')
       if next_move_turn:
-        if ((next_dir - get_dir()) % 4) == 1: # вправо
+        if ((next_dir - get_dir()) % 4) == 1: # РІРїСЂР°РІРѕ
           self.robot.turn(True)
-        elif ((get_dir() - next_dir) % 4) == 1: # влево
+        elif ((get_dir() - next_dir) % 4) == 1: # РІР»РµРІРѕ
           self.robot.turn(False)
         else:
           self.robot.rotate_to(90 * next_dir)
@@ -374,15 +357,15 @@ class Program():
       finish = self.map.get_ind(0,1)
       path = self.map.get_path(start, finish)
       script.wait(1)
-    next_dir = get_dir()  
+      
     script.wait(3999)
-    self.robot.back_move(700)
-    self.robot.rotate_to(90 * next_dir)
+    self.robot.rotate_to(90 * get_dir())
     self.robot.straight_move_line()
-    station_pos = self.robot.readBarCode()
-    self.robot.straight_move(220)
-    print(A4)
+    self.robot.straight_move(15,20)
     script.wait(2000)
+    station_pos = self.robot.readBarCode()
+    self.robot.straight_move(235)
+    script.wait(100)
 
     start = self.map.get_ind(self.robot.x,self.robot.y)
     finish = self.map.get_ind(station_pos[0], station_pos[1])
@@ -394,9 +377,9 @@ class Program():
       next_dir = self.robot.where_to_go(self.map, path)
       print(self.robot.x, self.robot.y, 'nextCORDS')
       if next_move_turn:
-        if ((next_dir - get_dir()) % 4) == 1: # вправо
+        if ((next_dir - get_dir()) % 4) == 1: # РІРїСЂР°РІРѕ
           self.robot.turn(True)
-        elif ((get_dir() - next_dir) % 4) == 1: # влево
+        elif ((get_dir() - next_dir) % 4) == 1: # РІР»РµРІРѕ
           self.robot.turn(False)
         else:
           self.robot.rotate_to(90 * next_dir)
