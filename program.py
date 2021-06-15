@@ -12,48 +12,41 @@ sinv = brick.sensor(A4).read
 sT = brick.sensor(A5).read
 wait = script.wait
 
-types = {
-  str([0, 0, 1]): 'forward',
-  str([1, 1, 1]): 'cross',
-  str([0, 0, 0]): 'typik',
-  str([0, 1, 0]): 'right',
-  str([1, 0, 0]): 'left',
-  str([1, 1, 0]): 'T',
-  str([1, 0, 1]): 'leftforward',
-  str([0, 1, 1]): 'rightforward'
-}
-
-def guess_type(*args):
-  try:
-    if sinv() <= 50: # not inverse
-      print(types[str([int(x>=35) for x in args])])
-      return [int(x<35) for x in args]
-    else:
-      print(types[str([int(x<65) for x in args])])
-      return [int(x>=65) for x in args]
-  except:
-    return 'NO'
+def guess_type(*sensors): # left, forward, right
+  types = {
+    str([1, 0, 1]): 'forward',
+    str([0, 0, 0]): 'cross',
+    str([1, 1, 1]): 'typik',
+    str([1, 1, 0]): 'right',
+    str([0, 1, 1]): 'left',
+    str([0, 1, 0]): 'T',
+    str([0, 0, 1]): 'leftforward',
+    str([1, 0, 0]): 'rightforward'
+  }
+  list = [int(x<35) for x in args] if sinv() <= 50 else [int(x>65) for x in args]
+  print(types[str(list])
+  return list
 
 def get_way_mass(ind):
+  """Возвращает массив значение с датчиков в базие поля"""
   if ind == 6:
     return [0, 1, 0, 1]
   arr = [0]+guess_type(sl(), sf(), sr())
   return arr[get_dir():] + arr[:get_dir()]
 
 def get_dir():
+  """Возвращает направление робота"""
   return int(yaw()+45)%360//90
-  
+
 def gyro_calibrate():
   """Колибровка гироскопа""" 
   brick.gyroscope().calibrate(2000)
   wait(2100)
-  
-  
+
 def yaw() -> float:
   """Возвращает угол вращения робота от 0 до 360, 0 это вверх, поворот по часовой стрелки"""
   # 0 по гироскопу это вправо поэтому +90 для выравнивания
   return (brick.gyroscope().read()[6]/1000. + 90)%360
-
 
 def get_angle(angle) -> float:
   """Возвращает разницу угла робота до цели от -180 до 180"""
@@ -83,7 +76,6 @@ class Robot():
     ml(pleft)
     mr(pright)
 
-
   def straight_move(self, leng, power=60):
     """Езда прямо без линии на определенное расстояние регулируясь по гироскопу"""
     p = 2 # Коэффициент P
@@ -96,7 +88,7 @@ class Robot():
       self.start_motor( power+regul, power-regul )
       wait(1)
     self.stop_motor()
-    
+
   def straight_move_line(self):
     """Езда прямо по линии на определенное расстояние регулируясь по гироскопу"""
     power = 30 # Средняя мощность
@@ -132,16 +124,6 @@ class Robot():
     wait(100)
     self.rotate_to((yaw()+(45*dirr))%360)
     self.straight_move(340) # 340
-    
-  def turn1(self, right: bool):
-    dirr = 1 if right else -1
-    self.back_move(115) # 0
-    self.rotate_to((yaw()+(45*dirr))%360)
-    self.straight_move(430) # 265 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    wait(100)
-    self.rotate_to((yaw()+(45*dirr))%360)
-    self.straight_move(210) # 340
-
 
   def followLine(self, leng, white: bool):
     """Функция езды по линии на расстояние leng по PD регулятору с учетом цвета"""
@@ -176,9 +158,9 @@ class Robot():
         self.start_motor(-pow,pow)
       wait(1)
     self.stop_motor()
- 
 
-  def where_to_go(self, map, path):
+  def where_to_go(self, map, path): # Очень плохая и неправильная функция TODO
+    """Возвращает направление следующей клетки. При этом удаляя первый элемент в пути и меняя координаты робота"""
     # 0 - вверх 1 - вправо 2 - вниз 3 - влево
     next = path.pop(0)
     robot_pos = map.get_ind(self.x, self.y)
@@ -196,13 +178,11 @@ class Robot():
       return 3
     print(12312312312, next, robot_pos)
 
-
   def readBarCode(self):
+    """Функция для чтения штрихкода"""
     data = []
-    power = 20
-    leng = 60
     for i in range(6):
-      self.straight_move(leng, power)
+      self.straight_move(leng=60, power=20)
       wait(200)
       data.append(int(sinv() > 50))
       print(data)
@@ -240,10 +220,8 @@ class Map():
         connect.append( ind + shift[i])
     return connect
 
-
   def get_ind(self, x, y)->int:
     return x+y*self.width
-
 
   def get_path(self, start, finish)->list:
     """Функция для поиска порядка вершин для перемещения от клетки старта к клетки финиша"""
@@ -278,12 +256,10 @@ class Program():
   robot = Robot()
   map = Map(width=6, height=6)
 
-
   def update_cell(self, cell: int, mas):
     """Функция оновления путей для текущей клетки"""
     # Для карты 0 - есть путь, 1 - нет пути
     self.map.map[cell] = mas
-
 
   def move_path(self, path):
     """Функция для движения по вершинам графа"""
@@ -292,15 +268,17 @@ class Program():
   def execMain(self):
     """Главная для исполнения функция"""    
     gyro_calibrate()
-
-#    self.robot.rotate_to(0)
-    #self.robot.straight_move(720 / 2)
-    #self.robot.straight_move(185)
-
+    
+    def robot_ind():
+      """Функция возвращает индекс робота на поле"""
+      return self.map.get_ind(self.robot.x, self.robot.y)
+    
+    #Отъезд назад на пол клетки
     self.robot.back_move(160)
     self.robot.rotate_to(90)
-    self.update_cell(self.map.get_ind(self.robot.x, self.robot.y), get_way_mass(self.map.get_ind(self.robot.x, self.robot.y)))
-    print(self.map.map[self.map.get_ind(self.robot.x, self.robot.y)])
+    
+    self.update_cell(robot_ind(), get_way_mass(robot_ind()))
+    print(self.map.map[robot_ind()])
     script.wait(150)
     self.robot.straight_move(160)
     #self.robot.rotate_to((yaw()+(90))%360)
@@ -310,7 +288,7 @@ class Program():
 #    self.map.map[0][1]=1
 #    self.map.map[6][1]=1
 
-    start = self.map.get_ind(self.robot.x,self.robot.y)
+    start = robot_ind()
     finish = self.map.get_ind(0,1)
     path = self.map.get_path(start, finish)
     print(path)
@@ -338,12 +316,12 @@ class Program():
         else:
           self.robot.rotate_to(90 * next_dir)
           self.robot.straight_move(700 / 4 * 3)
-          self.update_cell(self.map.get_ind(self.robot.x, self.robot.y), get_way_mass(self.map.get_ind(self.robot.x, self.robot.y)))
+          self.update_cell(robot_ind(), get_way_mass(robot_ind()))
         next_move_turn = False
       else:
         self.robot.rotate_to(90 * next_dir)
         self.robot.straight_move(700 / 4 * 3)
-        self.update_cell(self.map.get_ind(self.robot.x, self.robot.y), get_way_mass(self.map.get_ind(self.robot.x, self.robot.y)))
+        self.update_cell(robot_ind(), get_way_mass(robot_ind()))
       if ababaa():
         next_move_turn = True
       else:
@@ -352,8 +330,7 @@ class Program():
       if ababaa() and sf() > 50:
         self.robot.straight_move(700 / 4 * 1)
       
-        
-      start = self.map.get_ind(self.robot.x,self.robot.y)
+      start = robot_ind()
       finish = self.map.get_ind(0,1)
       path = self.map.get_path(start, finish)
       script.wait(1)
@@ -367,7 +344,7 @@ class Program():
     self.robot.straight_move(235)
     script.wait(100)
 
-    start = self.map.get_ind(self.robot.x,self.robot.y)
+    start = robot_ind()
     finish = self.map.get_ind(station_pos[0], station_pos[1])
     path = self.map.get_path(start, finish)
     print(path)
@@ -385,13 +362,13 @@ class Program():
           self.robot.rotate_to(90 * next_dir)
           self.robot.straight_move(705 / 4 * 3)
           wait(500)
-          self.update_cell(self.map.get_ind(self.robot.x, self.robot.y), get_way_mass(self.map.get_ind(self.robot.x, self.robot.y)))
+          self.update_cell(robot_ind(), get_way_mass(robot_ind()))
         next_move_turn = False
       else:
         self.robot.rotate_to(90 * next_dir)
         self.robot.straight_move(705 / 4 * 3)
         wait(500)
-        self.update_cell(self.map.get_ind(self.robot.x, self.robot.y), get_way_mass(self.map.get_ind(self.robot.x, self.robot.y)))
+        self.update_cell(robot_ind(), get_way_mass(robot_ind()))
       if ababaa():
         next_move_turn = True
       else:
@@ -404,7 +381,7 @@ class Program():
     wait(3000)
     
     
-    start = self.map.get_ind(self.robot.x,self.robot.y)
+    start = robot_ind()
     finish = self.map.get_ind(self.robot.start_pos[0], self.robot.start_pos[1])
     path = self.map.get_path(start, finish)
     print(path)
@@ -417,10 +394,10 @@ class Program():
       print('b')
       self.robot.straight_move(700 / 4 * 3)
       print('o')
-      self.update_cell(self.map.get_ind(self.robot.x, self.robot.y), get_way_mass(self.map.get_ind(self.robot.x, self.robot.y)))
+      self.update_cell(robot_ind(), get_way_mass(robot_ind()))
       print('ba')
       self.robot.straight_move(700 / 4 * 1)
-      start = self.map.get_ind(self.robot.x, self.robot.y)
+      start = robot_ind()
       finish = self.map.get_ind(self.robot.start_pos[0], self.robot.start_pos[1])
       path = self.map.get_path(start, finish)
       script.wait(1)
