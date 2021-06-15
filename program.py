@@ -24,7 +24,7 @@ def guess_type(*sensors):  # left, forward, right
         str([0, 0, 1]): "leftforward",
         str([1, 0, 0]): "rightforward",
     }
-    list = [int(x < 35) for x in args] if sinv() <= 50 else [int(x > 65) for x in args]
+    list = [int(x < 35) for x in sensors] if sinv() <= 50 else [int(x > 65) for x in sensors]
     print(types[str(list)])
     return list
 
